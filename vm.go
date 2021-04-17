@@ -44,6 +44,7 @@ type thread struct {
 func (t thread) clone() *thread {
 	var t2 thread
 	t2.pc = t.pc
+	t2.meta = t.meta
 	t2.items = make([]binding, len(t.items))
 	copy(t2.items, t.items)
 	return &t2
@@ -66,7 +67,7 @@ func (t *thread) bind(instr *instr, val *string) {
 
 type match struct {
 	items []interface{}
-	meta interface{}
+	meta  interface{}
 }
 
 type VarValue struct {
@@ -215,8 +216,8 @@ func (v *vm) trace() {
 func (v *vm) traceBind() {
 	if v.traceWriter == nil {
 		return
-	}	
-	
+	}
+
 	word := v.input[v.wordIndex]
 	fmt.Fprintf(v.traceWriter, "trace:     binding %s (%d items)\n",
 		word, len(v.thread.items))

@@ -215,6 +215,8 @@ func (o opcode) String() string {
 		return "match"
 	case opSave:
 		return "save"
+	case opMeta:
+		return "meta"
 	}
 	return "unknown"
 }

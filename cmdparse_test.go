@@ -1,8 +1,6 @@
 package cmdparse
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestCmdScanner(t *testing.T) {
 
@@ -156,7 +154,7 @@ func TestCmdParse(t *testing.T) {
 			input:           "dr",
 			ok:              true,
 			expectedCbackId: "drop",
-		},	
+		},
 		{
 			name: "two.3",
 			cmds: []tcmd{
@@ -176,9 +174,9 @@ func TestCmdParse(t *testing.T) {
 					},
 				},
 			},
-			input:           "bloop",
-			ok:              false,
-		},	
+			input: "bloop",
+			ok:    false,
+		},
 		{
 			name: "checkCtx",
 			cmds: []tcmd{
@@ -195,7 +193,21 @@ func TestCmdParse(t *testing.T) {
 			input:           "doit",
 			ok:              true,
 			expectedCbackId: "doit",
-		},	
+		},
+		{
+			name: "show_results",
+			cmds: []tcmd{
+				{"show results (source (scheduled | unscheduled | all))? detail?",
+					func(match Match, ctx interface{}) {
+						cbackCalled = true
+						cbackId = "1"
+					},
+				},
+			},
+			input:           "sh res so sch",
+			ok:              true,
+			expectedCbackId: "1",
+		},
 	}
 
 	for _, tc := range tests {

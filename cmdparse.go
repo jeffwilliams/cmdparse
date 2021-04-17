@@ -2,15 +2,16 @@ package cmdparse
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"unicode"
 )
 
-// Cmds is used to register callbacks for command definitions and to parse input 
+// Cmds is used to register callbacks for command definitions and to parse input
 // to match a registered command.
 //
-// To use Cmds, first call Cmds.Add multiple times to register command definitions and their 
-// callbacks, then call Cmds.Compile to compile the parsing VM. Now it's ready to parse 
+// To use Cmds, first call Cmds.Add multiple times to register command definitions and their
+// callbacks, then call Cmds.Compile to compile the parsing VM. Now it's ready to parse
 // user-entered commands. Next call Parse at will to parse a command, and call LongestMatches
 // after a failing Parse if needed.
 //
@@ -28,17 +29,16 @@ import (
 // For example the following syntax defines a command that would match ‘load’, ‘load file.txt’, and ‘load file.txt other.txt’:
 //
 //    load <file>*
-// 
+//
 // If a command is matched the command handler is called with the match from which it can extract
-// the matched variables. 
+// the matched variables.
 type Cmds struct {
 	parseTree interface{}
 	prog      prog
 	trace     io.Writer
 }
 
-
-// Add registers the command definition ‘cmd’. When this command is matched, the 
+// Add registers the command definition ‘cmd’. When this command is matched, the
 // callback ‘cback’ is called.
 func (c *Cmds) Add(cmd string, cback Callback) error {
 	// Each command that Add is passed is added as a branch in an alternative (alt)
@@ -83,14 +83,14 @@ func (c *Cmds) addParseTree(tree interface{}, cback Callback) {
 	}
 }
 
-// Callback is a function that gets called when Cmds.Parse succeeds. It is called with 
+// Callback is a function that gets called when Cmds.Parse succeeds. It is called with
 // a Match representing the parsed command.
 type Callback func(match Match, ctx interface{})
 
-// Match is used to find out what keywords and variables were matched on the command when 
+// Match is used to find out what keywords and variables were matched on the command when
 // Cmds.Parse was called.
 type Match interface {
-	// Var returns the type and value of all variables with the name ‘name’ that was filled in 
+	// Var returns the type and value of all variables with the name ‘name’ that was filled in
 	// from the command. If no variables were found that match the name an empty slice
 	// is returned.
 	Var(name string) (value []*VarValue)
@@ -98,12 +98,18 @@ type Match interface {
 	KeywordPresent(name string) bool
 }
 
-
-
 // meta is used as a node in the parse tree that applies metadata to it's child
 type meta struct {
 	data interface{}
 	ch   interface{}
+}
+
+func (m meta) String() string {
+	return fmt.Sprintf("meta (data=%v)", m.data)
+}
+
+func (m meta) Children() []interface{} {
+	return []interface{}{m.ch}
 }
 
 type ScanError []error
@@ -126,12 +132,12 @@ func (c *Cmds) Compile() {
 }
 
 // TraceExecutionTo sets the Writer to which execution logs are printed
-// when Parse is called. 
+// when Parse is called.
 func (c *Cmds) TraceExecutionTo(w io.Writer) {
 	c.trace = w
 }
 
-// Parse attempts to parse the user-entered text ‘cmd’. If the input matches one of 
+// Parse attempts to parse the user-entered text ‘cmd’. If the input matches one of
 // the commands registered by Add it returns true.
 func (c *Cmds) Parse(cmd string, ctx interface{}) (ok bool) {
 	var s cmdScanner
@@ -161,7 +167,7 @@ func (c cmdMatch) Var(name string) (value []*VarValue) {
 			if v.Name == name {
 				value = append(value, &v)
 			}
-		}	
+		}
 	}
 	return
 }
@@ -172,11 +178,11 @@ func (c cmdMatch) KeywordPresent(name string) bool {
 			if v.Name == name {
 				return true
 			}
-		}	
+		}
 	}
 	return false
 }
-	
+
 // Return the longest — not necessarily maximal —matches after Parse was called. This method is useful in case Parse couldn't find a single longest match (it returned false) so that the caller can look at all matches to attempt to print a helpful error message.
 func (c *Cmds) LongestMatches() {
 }
