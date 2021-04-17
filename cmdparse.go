@@ -85,7 +85,7 @@ func (c *Cmds) addParseTree(tree interface{}, cback Callback) {
 
 // Callback is a function that gets called when Cmds.Parse succeeds. It is called with 
 // a Match representing the parsed command.
-type Callback func(match Match)
+type Callback func(match Match, ctx interface{})
 
 // Match is used to find out what keywords and variables were matched on the command when 
 // Cmds.Parse was called.
@@ -133,7 +133,7 @@ func (c *Cmds) TraceExecutionTo(w io.Writer) {
 
 // Parse attempts to parse the user-entered text ‘cmd’. If the input matches one of 
 // the commands registered by Add it returns true.
-func (c *Cmds) Parse(cmd string) (ok bool) {
+func (c *Cmds) Parse(cmd string, ctx interface{}) (ok bool) {
 	var s cmdScanner
 	toks := s.Scan(cmd)
 
@@ -147,7 +147,7 @@ func (c *Cmds) Parse(cmd string) (ok bool) {
 
 	mm := v.maximalMatches()[0]
 	cback := mm.meta.(Callback)
-	cback(cmdMatch(mm))
+	cback(cmdMatch(mm), ctx)
 
 	return true
 }

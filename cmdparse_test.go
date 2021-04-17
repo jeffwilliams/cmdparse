@@ -96,7 +96,7 @@ func TestCmdParse(t *testing.T) {
 			name: "one",
 			cmds: []tcmd{
 				{"get <what>",
-					func(match Match) {
+					func(match Match, ctx interface{}) {
 						cbackCalled = true
 						vals := match.Var("what")
 						if len(vals) == 0 || len(vals) > 1 {
@@ -115,7 +115,7 @@ func TestCmdParse(t *testing.T) {
 			name: "two.1",
 			cmds: []tcmd{
 				{"info things?",
-					func(match Match) {
+					func(match Match, ctx interface{}) {
 						cbackCalled = true
 						if !match.KeywordPresent("things") {
 							t.Fatalf("The ‘things’ keyword was not present when it should be")
@@ -124,7 +124,7 @@ func TestCmdParse(t *testing.T) {
 					},
 				},
 				{"drop",
-					func(match Match) {
+					func(match Match, ctx interface{}) {
 						cbackCalled = true
 						cbackId = "drop"
 					},
@@ -138,7 +138,7 @@ func TestCmdParse(t *testing.T) {
 			name: "two.2",
 			cmds: []tcmd{
 				{"info things?",
-					func(match Match) {
+					func(match Match, ctx interface{}) {
 						cbackCalled = true
 						if !match.KeywordPresent("things") {
 							t.Fatalf("The ‘things’ keyword was not present when it should be")
@@ -147,7 +147,7 @@ func TestCmdParse(t *testing.T) {
 					},
 				},
 				{"drop",
-					func(match Match) {
+					func(match Match, ctx interface{}) {
 						cbackCalled = true
 						cbackId = "drop"
 					},
@@ -161,7 +161,7 @@ func TestCmdParse(t *testing.T) {
 			name: "two.3",
 			cmds: []tcmd{
 				{"info things?",
-					func(match Match) {
+					func(match Match, ctx interface{}) {
 						cbackCalled = true
 						if !match.KeywordPresent("things") {
 							t.Fatalf("The ‘things’ keyword was not present when it should be")
@@ -170,7 +170,7 @@ func TestCmdParse(t *testing.T) {
 					},
 				},
 				{"drop",
-					func(match Match) {
+					func(match Match, ctx interface{}) {
 						cbackCalled = true
 						cbackId = "drop"
 					},
@@ -178,6 +178,23 @@ func TestCmdParse(t *testing.T) {
 			},
 			input:           "bloop",
 			ok:              false,
+		},	
+		{
+			name: "checkCtx",
+			cmds: []tcmd{
+				{"doit",
+					func(match Match, ctx interface{}) {
+						if ctx.(int) != 5 {
+							t.Fatalf("Context is not passed properly to callback")
+						}
+						cbackCalled = true
+						cbackId = "doit"
+					},
+				},
+			},
+			input:           "doit",
+			ok:              true,
+			expectedCbackId: "doit",
 		},	
 	}
 
@@ -194,7 +211,7 @@ func TestCmdParse(t *testing.T) {
 			cmds.Compile()
 
 			cbackCalled = false
-			ok := cmds.Parse(tc.input)
+			ok := cmds.Parse(tc.input, 5)
 			if ok != tc.ok {
 				t.Fatalf("Parse returned %v when it should have returned %v", ok, tc.ok)
 			}
