@@ -289,10 +289,10 @@ func TestParser(t *testing.T) {
 			var p parser
 			p.matchLimit = 100
 			tree, err := p.Parse(toks)
-			// Uncomment below to print the parse tree 
+			// Uncomment below to print the parse tree
 			/*
-			fmt.Printf("test '%s': Parse tree returned:\n", tc.name)
-			printTree(tree)
+				fmt.Printf("test '%s': Parse tree returned:\n", tc.name)
+				printTree(tree)
 			*/
 
 			if err != nil {

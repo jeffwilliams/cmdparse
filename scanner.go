@@ -57,7 +57,7 @@ func (s *scanner) Scan(cmd string) (tokens []token, ok bool) {
 				break
 			}
 
-			fmt.Printf("error: %v\n", err)
+			s.errs = append(s.errs, err)
 		}
 		s.addToken(t)
 	}
@@ -78,44 +78,45 @@ func (s *scanner) next() (tok token, err error) {
 		s.pos++
 	}
 
-	for {
-		tok.pos = s.pos
-		switch r {
-		case '<':
-			s.pos++
-			tok.typ = lessThanTok
-		case '>':
-			s.pos++
-			tok.typ = greaterThanTok
-		case '|':
-			s.pos++
-			tok.typ = pipeTok
-		case '*':
-			s.pos++
-			tok.typ = starTok
-		case '+':
-			s.pos++
-			tok.typ = plusTok
-		case '?':
-			s.pos++
-			tok.typ = questionTok
-		case '(':
-			s.pos++
-			tok.typ = leftParenTok
-		case ')':
-			s.pos++
-			tok.typ = rightParenTok
-		case ':':
-			s.pos++
-			tok.typ = colonTok
-		default:
-			p := s.pos
-			tok, err = s.word()
-			tok.pos = p
+	tok.pos = s.pos
+	switch r {
+	case '<':
+		s.pos++
+		tok.typ = lessThanTok
+	case '>':
+		s.pos++
+		tok.typ = greaterThanTok
+	case '|':
+		s.pos++
+		tok.typ = pipeTok
+	case '*':
+		s.pos++
+		tok.typ = starTok
+	case '+':
+		s.pos++
+		tok.typ = plusTok
+	case '?':
+		s.pos++
+		tok.typ = questionTok
+	case '(':
+		s.pos++
+		tok.typ = leftParenTok
+	case ')':
+		s.pos++
+		tok.typ = rightParenTok
+	case ':':
+		s.pos++
+		tok.typ = colonTok
+	default:
+		p := s.pos
+		tok, err = s.word()
+		if err != nil {
+			return
 		}
-
-		return tok, nil
+		tok.pos = p
 	}
+
+	return tok, nil
 }
 
 func (s *scanner) atEnd() bool {
@@ -127,6 +128,7 @@ func (s *scanner) word() (token, error) {
 	r := s.input[s.pos]
 
 	if !s.isValidWordRune(r) {
+		s.pos++ // Consume this bad character
 		return nilToken, fmt.Errorf("Invalid character '%c' encountered", r)
 	}
 

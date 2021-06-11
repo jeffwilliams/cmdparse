@@ -67,30 +67,37 @@ func TestScanner(t *testing.T) {
 		{
 			name:     "thing?",
 			input:    "thing?",
-			expected: []token{{typ: wordTok, value: "thing"}, {typ:questionTok}},
+			expected: []token{{typ: wordTok, value: "thing"}, {typ: questionTok}},
 			ok:       true,
 			errors:   []string{},
 		},
 		{
 			name:     "<:?",
 			input:    "<:?",
-			expected: []token{{typ: lessThanTok}, {typ:colonTok}, {typ:questionTok}},
+			expected: []token{{typ: lessThanTok}, {typ: colonTok}, {typ: questionTok}},
 			ok:       true,
 			errors:   []string{},
 		},
 		{
 			name:     "  <  :    \t?",
 			input:    "  <  :    \t?",
-			expected: []token{{typ:lessThanTok}, {typ:colonTok}, {typ:questionTok}},
+			expected: []token{{typ: lessThanTok}, {typ: colonTok}, {typ: questionTok}},
 			ok:       true,
 			errors:   []string{},
 		},
 		{
 			name:     "word:word2",
 			input:    "word:word2",
-			expected: []token{{typ: wordTok, value: "word"}, {typ:colonTok}, {typ: wordTok, value: "word2"}},
+			expected: []token{{typ: wordTok, value: "word"}, {typ: colonTok}, {typ: wordTok, value: "word2"}},
 			ok:       true,
 			errors:   []string{},
+		},
+		{
+			name:     "alts with quotes",
+			input:    "set \"<a>\"",
+			expected: nil,
+			ok:       false,
+			errors:   []string{"Invalid character '\"' encountered", "Invalid character '\"' encountered"},
 		},
 	}
 
@@ -103,7 +110,9 @@ func TestScanner(t *testing.T) {
 			if ok != tc.ok {
 				t.Fatalf("Scan returned ok=%v but expected %v", ok, tc.ok)
 			}
-			ensureTokListsEqual(tc.expected, toks)
+			if ok {
+				ensureTokListsEqual(tc.expected, toks)
+			}
 			ensureErrListEqual(s.errs, tc.errors)
 		})
 	}
